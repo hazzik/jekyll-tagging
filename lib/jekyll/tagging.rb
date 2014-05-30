@@ -69,8 +69,9 @@ module Jekyll
     end
 
     def active_tags
-      return site.tags unless site.config["ignored_tags"]
-      site.tags.reject { |t| site.config["ignored_tags"].include? t[0] }
+      tags = site.tags.group_by { |tag, posts| tag.to_url }.map { |k, g| [ g.map { |tag, posts| tag }.first, g.flat_map {|tag, posts| posts }.uniq ] }
+      return tags unless site.config["ignored_tags"]
+      tags.reject { |t| site.config["ignored_tags"].include? t[0] }
     end
 
   end
