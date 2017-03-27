@@ -1,4 +1,3 @@
-require 'nuggets/range/quantile'
 require 'stringex'
 
 module Jekyll
@@ -62,16 +61,21 @@ module Jekyll
         [tag.to_s, range < (size = posts.size) ? range = size : size]
       }
 
-
       range = 1..range
 
-      tags.sort!.map! { |tag, size| [tag, range.quantile(size, num)] }
+      tags.sort!.map! { |tag, size| [tag, quantile(range, size, num)] }
     end
 
     def active_tags
       tags = site.tags.group_by { |tag, posts| tag.to_url }.map { |k, g| [ g.map { |tag, posts| tag }.first, g.flat_map {|tag, posts| posts }.uniq ] }
       return tags unless site.config["ignored_tags"]
       tags.reject { |t| site.config["ignored_tags"].include? t[0] }
+    end
+
+    def quantile(r, v, q)
+      return 1 if v < r.first
+      return q if v >= r.last
+      return ((v - r.first) / ((r.last - r.first) / q.to_f)).to_i + 1
     end
 
   end
